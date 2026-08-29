@@ -1,49 +1,100 @@
-<main class="landing-page">
-  <nav class="topbar" aria-label="Main navigation">
-    <a class="brand" href="/">Logout</a>
-    <span class="profile">Ready to play</span>
+<main class="landing-page app-shell container-fluid text-light min-vh-100 py-4 px-3 px-md-5">
+  <nav class="navbar navbar-expand-lg navbar-dark px-0 mb-4" aria-label="Main navigation">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand text-warning text-uppercase fw-bold letter-spacing" href="/">Logout</a>
+      <div class="ms-auto d-flex flex-column align-items-end text-uppercase small text-white-50">
+        <span>Ready to play</span>
+        <span>Updated {{ formattedLastUpdated() }}</span>
+      </div>
+    </div>
   </nav>
 
-  <section class="user-directory" aria-labelledby="users-title">
-    <div class="directory-heading">
-      <div>
-        <p class="eyebrow">Find your table</p>
-        <h1 id="users-title">Players</h1>
+  <div class="row g-4 justify-content-center">
+    <section class="col-12 col-xl-5" aria-labelledby="users-title">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+          <p class="text-warning text-uppercase small fw-bold mb-2 letter-spacing">Find your table</p>
+          <h1 id="users-title" class="display-6 mb-0">Players</h1>
+        </div>
+        <span class="text-white-50 text-uppercase small">{{ filteredUsers().length }} available</span>
       </div>
-      <span class="user-count">{{ filteredUsers().length }} available</span>
-    </div>
 
-    <label class="search-field">
-      <span class="search-icon" aria-hidden="true">&#8981;</span>
-      <span class="visually-hidden">Search users</span>
-      <input
-        type="search"
-        placeholder="Search by name or email"
-        [value]="searchTerm()"
-        (input)="updateSearchTerm($any($event.target).value)"
-      />
-    </label>
+      <div class="input-group mb-3">
+        <span class="input-group-text bg-transparent border-secondary text-warning">⌕</span>
+        <input type="search" class="form-control bg-dark text-light border-secondary"
+          placeholder="Search by name or email" [value]="userSearchTerm()"
+          (input)="updateUserSearchTerm($any($event.target).value)" />
+      </div>
 
-    <div class="user-list" aria-live="polite">
-      @if (isLoading()) {
-        <p class="list-message">Loading players...</p>
-      } @else if (loadError()) {
-        <p class="list-message">Players could not be loaded right now.</p>
-      } @else if (filteredUsers().length === 0) {
-        <p class="list-message">No players match your search.</p>
-      } @else {
+      <div class="list-group overflow-auto app-list" aria-live="polite">
+        @if (usersLoading()) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">Loading players...</p>
+        } @else if (usersLoadError()) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">Players could not be
+          loaded right now.</p>
+        } @else if (filteredUsers().length === 0) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">No players match your
+          search.</p>
+        } @else {
         @for (user of filteredUsers(); track user.id) {
-          <article class="user-row">
-            <span class="avatar" aria-hidden="true">{{ user.name.charAt(0) }}</span>
-            <span class="user-details">
-              <strong>{{ user.name }}</strong>
-              <span>{{ user.email }}</span>
-            </span>
-            <button class="invite-button" type="button" [attr.aria-label]="'Invite ' + user.name">Invite</button>
-          </article>
+        <article
+          class="list-group-item list-group-item-action bg-transparent border-secondary d-flex align-items-center gap-3 px-3 py-3 text-light">
+          <span
+            class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center fw-bold app-avatar">{{
+            user.name.charAt(0) }}</span>
+          <span class="flex-grow-1 min-width-0">
+            <strong class="d-block text-truncate">{{ user.name }}</strong>
+            <span class="d-block text-white-50 text-truncate">{{ user.email }}</span>
+          </span>
+          <button class="btn btn-outline-warning btn-sm" type="button"
+            [attr.aria-label]="'Invite ' + user.name">Invite</button>
+        </article>
         }
-      }
-    </div>
-  </section>
+        }
+      </div>
+    </section>
 
+    <section class="col-12 col-xl-5" aria-labelledby="rooms-title">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+          <p class="text-warning text-uppercase small fw-bold mb-2 letter-spacing">Open tables</p>
+          <h2 id="rooms-title" class="display-6 mb-0">Rooms</h2>
+        </div>
+        <span class="text-white-50 text-uppercase small">{{ filteredRooms().length }} listed</span>
+      </div>
+
+      <div class="input-group mb-3">
+        <span class="input-group-text bg-transparent border-secondary text-warning">⌕</span>
+        <input type="search" class="form-control bg-dark text-light border-secondary" placeholder="Search rooms"
+          [value]="roomSearchTerm()" (input)="updateRoomSearchTerm($any($event.target).value)" />
+      </div>
+
+      <div class="list-group overflow-auto app-list" aria-live="polite">
+        @if (roomsLoading()) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">Loading rooms...</p>
+        } @else if (roomsLoadError()) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">Rooms could not be
+          loaded right now.</p>
+        } @else if (filteredRooms().length === 0) {
+        <p class="list-group-item bg-transparent text-white-50 border-secondary text-center py-4">No rooms match your
+          search.</p>
+        } @else {
+        @for (room of filteredRooms(); track room.id) {
+        <article
+          class="list-group-item list-group-item-action bg-transparent border-secondary d-flex align-items-center gap-3 px-3 py-3 text-light">
+          <span
+            class="rounded-circle border border-warning text-warning d-inline-flex align-items-center justify-content-center fw-bold app-avatar">{{
+            room.name.charAt(0).toUpperCase() }}</span>
+          <span class="flex-grow-1 min-width-0">
+            <strong class="d-block text-truncate">{{ room.name }}</strong>
+            <span class="d-block text-white-50 text-truncate">{{ room.id }}</span>
+          </span>
+          <button class="btn btn-outline-warning btn-sm" type="button"
+            [attr.aria-label]="'Join room ' + room.name">Join</button>
+        </article>
+        }
+        }
+      </div>
+    </section>
+  </div>
 </main>

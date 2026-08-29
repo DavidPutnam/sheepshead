@@ -1,1 +1,66 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --app-bg-dark: #0b2022;
+  --app-bg-mid: #102c2a;
+  --app-accent: #f4b75f;
+  --app-card: rgba(16, 31, 31, 0.75);
+  --app-text: #f8f9fa;
+  --app-text-muted: rgba(255, 255, 255, 0.7);
+  --app-list-height: 32rem;
+  --app-avatar-size: 2.5rem;
+}
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+  background: linear-gradient(135deg, var(--app-bg-dark) 0%, var(--app-bg-mid) 52%, #0a1d1d 100%);
+  color: var(--app-text);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+}
+
+.letter-spacing {
+  letter-spacing: 0.12em;
+}
+
+.app-shell {
+  background: radial-gradient(circle at top right, rgba(244, 183, 95, 0.18), transparent 30%),
+    linear-gradient(135deg, var(--app-bg-dark) 0%, var(--app-bg-mid) 52%, #0a1d1d 100%);
+}
+
+.app-panel {
+  background: var(--app-card);
+  backdrop-filter: blur(6px);
+}
+
+.app-list {
+  max-height: var(--app-list-height);
+}
+
+.app-avatar {
+  width: var(--app-avatar-size);
+  height: var(--app-avatar-size);
+}
+
+.app-rotate-logo {
+  transform: rotate(-45deg);
+}
+
+.app-rotate-logo-inner {
+  display: inline-block;
+  transform: rotate(45deg);
+}
+
+.card,
+.form-control,
+.form-control:focus,
+.btn {
+  transition: all 0.2s ease-in-out;
+}
