@@ -1,0 +1,339 @@
+:host {
+  display: block;
+}
+
+.landing-page {
+  min-height: 100dvh;
+  box-sizing: border-box;
+  padding: 2rem clamp(1.5rem, 6vw, 6rem);
+  position: relative;
+  overflow: auto;
+  color: #fffaf0;
+  background:
+    radial-gradient(circle at 84% 14%, rgba(231, 166, 83, 0.2), transparent 24rem),
+    linear-gradient(135deg, #183b36 0%, #102c2a 52%, #0b2022 100%);
+}
+
+.landing-page::after {
+  content: '';
+  width: min(65vw, 42rem);
+  aspect-ratio: 1;
+  position: absolute;
+  right: -19rem;
+  bottom: -20rem;
+  border: 1px solid rgba(249, 244, 232, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  color: #e7a653;
+  font: 700 0.82rem/1 'Avenir Next', sans-serif;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.profile {
+  color: rgba(249, 244, 232, 0.58);
+  font: 400 0.78rem/1 'Avenir Next', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.user-directory {
+  width: min(100%, 42rem);
+  position: relative;
+  z-index: 1;
+  margin: clamp(5rem, 12vh, 8rem) auto 4rem;
+  animation: rise-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.directory-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.directory-heading h1 {
+  margin: 0;
+  color: #fffaf0;
+  font: 400 clamp(2.8rem, 7vw, 5rem)/0.9 Georgia, serif;
+}
+
+.directory-heading .eyebrow {
+  margin-bottom: 0.8rem;
+}
+
+.user-count {
+  padding-bottom: 0.35rem;
+  color: rgba(249, 244, 232, 0.5);
+  font: 400 0.75rem/1 'Avenir Next', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  border: 1px solid rgba(249, 244, 232, 0.2);
+  border-radius: 0.35rem;
+  background: rgba(9, 29, 29, 0.42);
+}
+
+.search-icon {
+  color: #e7a653;
+  font-size: 1.5rem;
+  line-height: 1;
+  transform: rotate(-20deg);
+}
+
+.search-field input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #fffaf0;
+  background: transparent;
+  font: 400 0.95rem/1 'Avenir Next', sans-serif;
+}
+
+.search-field input::placeholder {
+  color: rgba(249, 244, 232, 0.42);
+}
+
+.search-field:focus-within {
+  border-color: #e7a653;
+}
+
+.user-list {
+  max-height: min(52vh, 31rem);
+  overflow-y: auto;
+  margin-top: 0.75rem;
+  padding-right: 0.35rem;
+  scrollbar-color: rgba(231, 166, 83, 0.7) rgba(249, 244, 232, 0.08);
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 4.5rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid rgba(249, 244, 232, 0.12);
+}
+
+.avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #183b36;
+  background: #e7a653;
+  font: 700 1rem/1 'Avenir Next', sans-serif;
+}
+
+.user-details {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-details strong,
+.user-details span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-details strong {
+  color: #fffaf0;
+  font: 600 0.92rem/1.2 'Avenir Next', sans-serif;
+}
+
+.user-details span {
+  color: rgba(249, 244, 232, 0.5);
+  font: 400 0.78rem/1.2 'Avenir Next', sans-serif;
+}
+
+.invite-button {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(231, 166, 83, 0.6);
+  border-radius: 0.25rem;
+  color: #e7a653;
+  background: transparent;
+  cursor: pointer;
+  font: 600 0.72rem/1 'Avenir Next', sans-serif;
+}
+
+.invite-button:hover {
+  color: #183b36;
+  background: #e7a653;
+}
+
+.list-message {
+  padding: 2rem 0;
+  color: rgba(249, 244, 232, 0.58);
+  font: 400 0.9rem/1.5 'Avenir Next', sans-serif;
+  text-align: center;
+}
+
+.visually-hidden {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.landing-content {
+  max-width: 43rem;
+  position: relative;
+  z-index: 1;
+  padding: clamp(7rem, 20vh, 12rem) 0 5rem;
+  animation: rise-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.eyebrow {
+  margin: 0 0 1.25rem;
+  color: #e7a653;
+  font: 700 0.78rem/1.2 'Avenir Next', sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 40rem;
+  margin: 0;
+  color: #fffaf0;
+  font: 400 clamp(3.5rem, 9vw, 7rem)/0.9 Georgia, serif;
+}
+
+.intro {
+  max-width: 27rem;
+  margin: 1.75rem 0 2.5rem;
+  color: rgba(249, 244, 232, 0.7);
+  font: 400 1.1rem/1.6 'Avenir Next', sans-serif;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+button {
+  min-height: 3.25rem;
+  padding: 0 1.3rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  font: 600 0.9rem/1 'Avenir Next', sans-serif;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:focus-visible {
+  outline: 3px solid #e7a653;
+  outline-offset: 4px;
+}
+
+.primary-action {
+  border: 1px solid #e7a653;
+  color: #183b36;
+  background: #e7a653;
+}
+
+.primary-action span {
+  margin-left: 0.9rem;
+  font-size: 1.2rem;
+}
+
+.secondary-action {
+  border: 1px solid rgba(249, 244, 232, 0.28);
+  color: #fffaf0;
+  background: transparent;
+}
+
+.secondary-action:hover {
+  background: rgba(249, 244, 232, 0.08);
+}
+
+.table-note {
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 6rem);
+  bottom: 2rem;
+  margin: 0;
+  color: rgba(249, 244, 232, 0.46);
+  font: 400 0.72rem/1.35 'Avenir Next', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(1.25rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .landing-page {
+    padding-top: 1.5rem;
+  }
+
+  .profile {
+    font-size: 0.65rem;
+  }
+
+  .user-directory {
+    margin-top: 5rem;
+  }
+
+  .directory-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .user-count {
+    padding-bottom: 0;
+  }
+
+  .user-row {
+    padding-inline: 0;
+  }
+
+  .landing-content {
+    padding-top: 8rem;
+  }
+
+  .actions,
+  button {
+    width: 100%;
+  }
+
+  .table-note {
+    right: auto;
+    left: 1.5rem;
+  }
+}

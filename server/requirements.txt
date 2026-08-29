@@ -1,0 +1,5 @@
+aiohttp>=3.9
+python-socketio[aiohttp]>=5.10
+aiohttp-cors>=0.7
+google-auth
+PyJWT>=2.8

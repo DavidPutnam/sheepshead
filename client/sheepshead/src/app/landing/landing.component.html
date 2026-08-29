@@ -1,0 +1,49 @@
+<main class="landing-page">
+  <nav class="topbar" aria-label="Main navigation">
+    <a class="brand" href="/">Logout</a>
+    <span class="profile">Ready to play</span>
+  </nav>
+
+  <section class="user-directory" aria-labelledby="users-title">
+    <div class="directory-heading">
+      <div>
+        <p class="eyebrow">Find your table</p>
+        <h1 id="users-title">Players</h1>
+      </div>
+      <span class="user-count">{{ filteredUsers().length }} available</span>
+    </div>
+
+    <label class="search-field">
+      <span class="search-icon" aria-hidden="true">&#8981;</span>
+      <span class="visually-hidden">Search users</span>
+      <input
+        type="search"
+        placeholder="Search by name or email"
+        [value]="searchTerm()"
+        (input)="updateSearchTerm($any($event.target).value)"
+      />
+    </label>
+
+    <div class="user-list" aria-live="polite">
+      @if (isLoading()) {
+        <p class="list-message">Loading players...</p>
+      } @else if (loadError()) {
+        <p class="list-message">Players could not be loaded right now.</p>
+      } @else if (filteredUsers().length === 0) {
+        <p class="list-message">No players match your search.</p>
+      } @else {
+        @for (user of filteredUsers(); track user.id) {
+          <article class="user-row">
+            <span class="avatar" aria-hidden="true">{{ user.name.charAt(0) }}</span>
+            <span class="user-details">
+              <strong>{{ user.name }}</strong>
+              <span>{{ user.email }}</span>
+            </span>
+            <button class="invite-button" type="button" [attr.aria-label]="'Invite ' + user.name">Invite</button>
+          </article>
+        }
+      }
+    </div>
+  </section>
+
+</main>
