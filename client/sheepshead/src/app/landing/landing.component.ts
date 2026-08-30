@@ -18,6 +18,7 @@ interface Room {
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.css',
 })
+
 export class LandingComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
@@ -95,7 +96,7 @@ export class LandingComponent implements OnInit {
   private loadUsers(): void {
     const headers = this.getHeaders();
 
-    this.http.get<User[] | { users: User[] }>('http://localhost:8080/api/v1/users', { headers }).subscribe({
+    this.http.get<User[] | { users: User[] }>('${environment.apiBaseUrl}/api/v1/users', { headers }).subscribe({
       next: (response) => {
         this.users.set(Array.isArray(response) ? response : response.users ?? []);
         this.usersLoading.set(false);
@@ -113,7 +114,7 @@ export class LandingComponent implements OnInit {
   private loadRooms(): void {
     const headers = this.getHeaders();
 
-    this.http.get<Room[] | { rooms: Room[] }>('http://localhost:8080/api/v1/rooms', { headers }).subscribe({
+    this.http.get<Room[] | { rooms: Room[] }>('${environment.apiBaseUrl}/api/v1/rooms', { headers }).subscribe({
       next: (response) => {
         const rooms = Array.isArray(response) ? response : response.rooms ?? [];
         this.rooms.set(

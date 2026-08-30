@@ -32,22 +32,23 @@ LOG = logging.getLogger(__name__)
 sio = socketio.AsyncServer(async_mode='aiohttp')
 
 # These will eventually be database tables, but for now, 
-# we will use in-memory dictionaries to store user and table data.
+# we will use in-memory dictionaries to store user and room data.
 class User:
 	def __init__(self, id: str, detail: typing.Mapping[str, typing.Any]):
 		self.id: str = id;
 		self.detail: typing.Mapping[str, typing.Any] = detail;
 		self.sid: str | None = None;
 		self.room: str | None = None;
-	def set_room(self: User, room: str):
+	def set_room(self: User, room: str | None):
 		self.room = room;
-	def set_socket(self: User, sid: str):
+	def set_socket(self: User, sid: str | None):
 		self.sid = sid;
 users: typing.Dict[str, User] = {}
 
 class Room:
-	def __init__(self, id: str, options: typing.Mapping[str, typing.Any] = {}):
-		self.id: str = id;
+	def __init__(self, name: str, game: str, options: typing.Mapping[str, typing.Any] = {}):
+		self.name: str = name;
+		self.game: str = game;
 		self.options: typing.Mapping[str, typing.Any] = options;
 		self.members: set[str] = set();
 	def add_user(self, user: User):
@@ -118,14 +119,16 @@ async def cors_middleware(request: web.Request, handler: Handler) -> web.StreamR
 #
 #async def start_background_tasks(app):
 #	app["heartbeat_task"] = asyncio.create_task(heartbeat())
-
+#
 #async def cleanup_background_tasks(app):
 #	app["heartbeat_task"].cancel()
 #	try:
 #		await app["heartbeat_task"]
 #	except asyncio.CancelledError:
 #		pass
+
 #
+# Handle the API requests
 #
 @require_auth
 async def handle_get_users(request: web.Request) -> web.Response:
@@ -147,16 +150,24 @@ async def handle_get_rooms(request: web.Request) -> web.Response:
 
 @require_auth
 async def handle_post_rooms(request: web.Request) -> web.Response:
-	#{name: room-name,
-	# options: {},
+	#{name: "room-name",
+	# game: "sheepshead",
+	# options: {
+	#  players: 3 | 5,
+	#  crack-recrack: false,
+	#  double-bump: false,
+	#  no-pick: "leaster" | "doubler" | "none",
+	#  partner: "jackdiamonds" | "callace" | "none",
+	# }
 	#}
 	try:
 		room_data = await request.json()
 		name: str | None = room_data.get("name", None)
+		game: str | None = room_data.get("game", None)
 		options: typing.Mapping[str, typing.Any] | None = room_data.get("options", None)
 		# should validate options here, but for now, just store it as-is
-		if name is not None and options is not None:
-			rooms[name] = Room(name, options)
+		if name is not None and options is not None and game is "sheepshead":
+			rooms[name] = Room(name, game, options)
 		return web.json_response({"message": "Room created successfully"}, status=201)
 	except Exception as e:
 		LOG.error(f"Error parsing room data: {e}")
