@@ -137,6 +137,7 @@ async def handle_get_users(request: web.Request) -> web.Response:
 		user = users.get(id)
 		if user:
 			user_details.append(user.detail)
+	LOG.info(f"Returning user details: {user_details}")
 	return web.json_response(user_details)
 
 @require_auth
@@ -146,6 +147,7 @@ async def handle_get_rooms(request: web.Request) -> web.Response:
 		room = rooms.get(id)
 		if room:
 			room_details.append(room.options)
+	LOG.info(f"Returning room details: {room_details}")
 	return web.json_response(room_details)
 
 @require_auth
@@ -162,12 +164,14 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
 	#}
 	try:
 		room_data = await request.json()
+		LOG.info(f"Received room data: {room_data}")
 		name: str | None = room_data.get("name", None)
 		game: str | None = room_data.get("game", None)
 		options: typing.Mapping[str, typing.Any] | None = room_data.get("options", None)
 		# should validate options here, but for now, just store it as-is
-		if name is not None and options is not None and game is "sheepshead":
+		if name is not None and options is not None and game == "sheepshead":
 			rooms[name] = Room(name, game, options)
+		LOG.info(f"Room created: {name}")
 		return web.json_response({"message": "Room created successfully"}, status=201)
 	except Exception as e:
 		LOG.error(f"Error parsing room data: {e}")

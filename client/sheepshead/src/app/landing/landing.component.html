@@ -67,6 +67,8 @@
         <span class="input-group-text bg-transparent border-secondary text-warning">⌕</span>
         <input type="search" class="form-control bg-dark text-light border-secondary" placeholder="Search rooms"
           [value]="roomSearchTerm()" (input)="updateRoomSearchTerm($any($event.target).value)" />
+        <button type="button" class="btn btn-outline-warning border-secondary" aria-label="Create room"
+          (click)="openCreateRoomDialog()">+</button>
       </div>
 
       <div class="list-group overflow-auto app-list" aria-live="polite">
@@ -98,3 +100,83 @@
     </section>
   </div>
 </main>
+
+@if (isCreateRoomDialogOpen()) {
+<div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="create-room-title"
+  style="background: rgba(0, 0, 0, 0.55);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light border border-secondary">
+      <div class="modal-header border-secondary">
+        <h2 id="create-room-title" class="modal-title h4 mb-0">Create room</h2>
+        <button type="button" class="btn-close btn-close-white" aria-label="Close"
+          (click)="closeCreateRoomDialog()"></button>
+      </div>
+
+      <form (submit)="createRoom(); $event.preventDefault()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label text-warning" for="room-name">Room name</label>
+            <input id="room-name" class="form-control bg-dark text-light border-secondary" type="text"
+              placeholder="Enter room name" [value]="roomName()" (input)="roomName.set($any($event.target).value)"
+              pattern="[A-Za-z0-9 ]+" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-warning" for="game-name">Game</label>
+            <select id="game-name" class="form-select bg-dark text-light border-secondary" [value]="gameName()"
+              (change)="gameName.set($any($event.target).value)">
+              <option value="Sheepshead">Sheepshead</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-warning" for="player-count">Number of players</label>
+            <select id="player-count" class="form-select bg-dark text-light border-secondary" [value]="playerCount()"
+              (change)="updatePlayerCount($any($event.target).value)">
+              <option value="3">3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+          <div class="form-check mb-2">
+            <input id="crack-recrack" class="form-check-input" type="checkbox" [checked]="crackRecrack()"
+              (change)="crackRecrack.set($any($event.target).checked)" />
+            <label class="form-check-label" for="crack-recrack">crack/recrack</label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input id="double-bump" class="form-check-input" type="checkbox" [checked]="doubleBump()"
+              (change)="doubleBump.set($any($event.target).checked)" />
+            <label class="form-check-label" for="double-bump">double on the bump</label>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-warning" for="no-pick">On no pick</label>
+            <select id="no-pick" class="form-select bg-dark text-light border-secondary" [value]="noPick()"
+              (change)="noPick.set($any($event.target).value)">
+              <option value="leaster">leaster</option>
+              <option value="doubler">doubler</option>
+              <option value="none">none</option>
+            </select>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label text-warning" for="partner-choice">Partner</label>
+            <select id="partner-choice" class="form-select bg-dark text-light border-secondary" [value]="partner()"
+              [disabled]="playerCount() !== 5" (change)="partner.set($any($event.target).value)">
+              <option value="jackdiamonds">Jack of Diamonds</option>
+              <option value="callace">Call an Ace</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary" (click)="cancelCreateRoom()">Cancel</button>
+          <button type="submit" class="btn btn-warning text-dark fw-semibold">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}

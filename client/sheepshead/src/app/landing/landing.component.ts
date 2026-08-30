@@ -1,5 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 interface User {
   id: string;
@@ -13,6 +15,9 @@ interface Room {
   [key: string]: unknown;
 }
 
+type NoPickOption = 'leaster' | 'doubler' | 'none';
+type PartnerOption = 'jackdiamonds' | 'callace' | 'none';
+
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
@@ -22,6 +27,8 @@ interface Room {
 export class LandingComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+
   protected readonly users = signal<User[]>([]);
   protected readonly rooms = signal<Room[]>([]);
   protected readonly userSearchTerm = signal('');
@@ -31,6 +38,15 @@ export class LandingComponent implements OnInit {
   protected readonly usersLoadError = signal(false);
   protected readonly roomsLoadError = signal(false);
   protected readonly lastUpdated = signal(new Date());
+
+  protected readonly roomName = signal('');
+  protected readonly gameName = signal('Sheepshead');
+  protected readonly playerCount = signal<3 | 5>(5);
+  protected readonly crackRecrack = signal(false);
+  protected readonly doubleBump = signal(false);
+  protected readonly noPick = signal<NoPickOption>('leaster');
+  protected readonly partner = signal<PartnerOption>('jackdiamonds');
+  protected readonly isCreateRoomDialogOpen = signal(false);
 
   private readonly refreshInterval = window.setInterval(() => {
     this.refreshData();
@@ -88,6 +104,73 @@ export class LandingComponent implements OnInit {
     });
   }
 
+  protected openCreateRoomDialog(): void {
+    this.resetCreateRoomForm();
+    this.isCreateRoomDialogOpen.set(true);
+  }
+
+  protected closeCreateRoomDialog(): void {
+    this.isCreateRoomDialogOpen.set(false);
+    this.resetCreateRoomForm();
+  }
+
+  protected cancelCreateRoom(): void {
+    this.closeCreateRoomDialog();
+    this.router.navigateByUrl('/');
+  }
+
+  protected updatePlayerCount(value: string): void {
+    const nextValue = Number(value) as 3 | 5;
+    this.playerCount.set(nextValue);
+
+    if (nextValue === 3) {
+      this.partner.set('none');
+    }
+  }
+
+  protected createRoom(): void {
+    const roomName = this.roomName().trim();
+
+    if (!/^[A-Za-z0-9][A-Za-z0-9\s-]*$/.test(roomName)) {
+      window.alert('Room name must be alphanumeric.');
+      return;
+    }
+
+    const payload = {
+      name: roomName,
+      game: 'sheepshead',
+      options: {
+        players: this.playerCount(),
+        'crack-recrack': this.crackRecrack(),
+        'double-bump': this.doubleBump(),
+        'no-pick': this.noPick(),
+        partner: this.playerCount() === 5 ? this.partner() : 'none',
+      },
+    };
+
+    const headers = this.getHeaders();
+
+    this.http.post(`${environment.apiUrl}/api/v1/rooms`, payload, { headers }).subscribe({
+      next: () => {
+        this.closeCreateRoomDialog();
+        this.refreshData();
+      },
+      error: () => {
+        window.alert('Room could not be created right now.');
+      },
+    });
+  }
+
+  private resetCreateRoomForm(): void {
+    this.roomName.set('');
+    this.gameName.set('Sheepshead');
+    this.playerCount.set(5);
+    this.crackRecrack.set(false);
+    this.doubleBump.set(false);
+    this.noPick.set('leaster');
+    this.partner.set('jackdiamonds');
+  }
+
   private getHeaders(): HttpHeaders | undefined {
     const token = sessionStorage.getItem('authToken');
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
@@ -96,43 +179,47 @@ export class LandingComponent implements OnInit {
   private loadUsers(): void {
     const headers = this.getHeaders();
 
-    this.http.get<User[] | { users: User[] }>('${environment.apiBaseUrl}/api/v1/users', { headers }).subscribe({
-      next: (response) => {
-        this.users.set(Array.isArray(response) ? response : response.users ?? []);
-        this.usersLoading.set(false);
-        this.usersLoadError.set(false);
-        this.lastUpdated.set(new Date());
-      },
-      error: () => {
-        this.usersLoading.set(false);
-        this.usersLoadError.set(true);
-        this.lastUpdated.set(new Date());
-      },
-    });
+    this.http
+      .get<User[] | { users: User[] }>(`${environment.apiUrl}/api/v1/users`, { headers })
+      .subscribe({
+        next: (response) => {
+          this.users.set(Array.isArray(response) ? response : response.users ?? []);
+          this.usersLoading.set(false);
+          this.usersLoadError.set(false);
+          this.lastUpdated.set(new Date());
+        },
+        error: () => {
+          this.usersLoading.set(false);
+          this.usersLoadError.set(true);
+          this.lastUpdated.set(new Date());
+        },
+      });
   }
 
   private loadRooms(): void {
     const headers = this.getHeaders();
 
-    this.http.get<Room[] | { rooms: Room[] }>('${environment.apiBaseUrl}/api/v1/rooms', { headers }).subscribe({
-      next: (response) => {
-        const rooms = Array.isArray(response) ? response : response.rooms ?? [];
-        this.rooms.set(
-          rooms.map((room, index) => ({
-            ...room,
-            id: String(room.id ?? room.name ?? `room-${index + 1}`),
-            name: String(room.name ?? room.id ?? `Room ${index + 1}`),
-          })),
-        );
-        this.roomsLoading.set(false);
-        this.roomsLoadError.set(false);
-        this.lastUpdated.set(new Date());
-      },
-      error: () => {
-        this.roomsLoading.set(false);
-        this.roomsLoadError.set(true);
-        this.lastUpdated.set(new Date());
-      },
-    });
+    this.http
+      .get<Room[] | { rooms: Room[] }>(`${environment.apiUrl}/api/v1/rooms`, { headers })
+      .subscribe({
+        next: (response) => {
+          const rooms = Array.isArray(response) ? response : response.rooms ?? [];
+          this.rooms.set(
+            rooms.map((room, index) => ({
+              ...room,
+              id: String(room.id ?? room.name ?? `room-${index + 1}`),
+              name: String(room.name ?? room.id ?? `Room ${index + 1}`),
+            })),
+          );
+          this.roomsLoading.set(false);
+          this.roomsLoadError.set(false);
+          this.lastUpdated.set(new Date());
+        },
+        error: () => {
+          this.roomsLoading.set(false);
+          this.roomsLoadError.set(true);
+          this.lastUpdated.set(new Date());
+        },
+      });
   }
 }
