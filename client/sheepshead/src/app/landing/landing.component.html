@@ -16,7 +16,7 @@
           <p class="text-warning text-uppercase small fw-bold mb-2 letter-spacing">Find your table</p>
           <h1 id="users-title" class="display-6 mb-0">Players</h1>
         </div>
-        <span class="text-white-50 text-uppercase small">{{ filteredUsers().length }} available</span>
+        <span class="text-white-50 text-uppercase small">{{ filteredUsers().length }} on-line</span>
       </div>
 
       <div class="input-group mb-3">
@@ -91,7 +91,7 @@
             room.name.charAt(0).toUpperCase() }}</span>
           <span class="flex-grow-1 min-width-0">
             <strong class="d-block text-truncate">{{ room.name }}</strong>
-            <span class="d-block text-white-50 text-truncate">{{ room.id }}</span>
+            <span class="d-block text-white-50 text-truncate">{{ room['game'] + " " + room['options'] }}</span>
           </span>
           <button class="btn btn-outline-warning btn-sm" type="button"
             [attr.aria-label]="'Join room ' + room.name">Join</button>

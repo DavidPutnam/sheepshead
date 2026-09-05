@@ -11,6 +11,7 @@
 
 import io
 import time
+import uuid
 
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -64,8 +65,13 @@ users: typing.Dict[str, User] = {}
 
 class Room:
     def __init__(
-        self, name: str, game: str, options: typing.Mapping[str, typing.Any] = {}
+        self,
+        id: str,
+        name: str,
+        game: str,
+        options: typing.Mapping[str, typing.Any] = {},
     ):
+        self.id: str = id
         self.name: str = name
         self.game: str = game
         self.options: typing.Mapping[str, typing.Any] = options
@@ -179,7 +185,7 @@ async def handle_get_users(request: web.Request) -> web.Response:
             ui_user["name"] = user.detail.get("name")
             ui_user["email"] = user.detail.get("email")
             ui_user["picture"] = user.detail.get("picture")
-            ui_user["room"] = "Room 1"
+            ui_user["room"] = user.room
             user_details.append(ui_user)
     LOG.info(f"Returning user details: {user_details}")
     return web.json_response(user_details)
@@ -192,8 +198,10 @@ async def handle_get_rooms(request: web.Request) -> web.Response:
         room = rooms.get(id)
         if room:
             ui_room: typing.Mapping[str, typing.Any] = {}
+            ui_room["id"] = room.id
             ui_room["name"] = room.name
-            ui_room["id"] = room.game
+            ui_room["game"] = room.game
+            ui_room["options"] = room.options
             room_details.append(ui_room)
     LOG.info(f"Returning room details: {room_details}")
     return web.json_response(room_details)
@@ -219,7 +227,7 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
         options: typing.Mapping[str, typing.Any] | None = room_data.get("options", None)
         # should validate options here, but for now, just store it as-is
         if name is not None and options is not None and game == "sheepshead":
-            rooms[name] = Room(name, game, options)
+            rooms[name] = Room(str(uuid.uuid4()), name, game, options)
         LOG.info(f"Room created: {name}")
         return web.json_response({"message": "Room created successfully"}, status=201)
     except Exception as e:
