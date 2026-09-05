@@ -75,6 +75,10 @@ class Room:
         if user.sid is not None:
             self.members.add(user.sid)
 
+    def remove_user(self, user: User):
+        if user.sid is not None:
+            self.members.discard(user.sid)
+
 
 rooms: typing.Dict[str, Room] = {}
 
@@ -187,7 +191,10 @@ async def handle_get_rooms(request: web.Request) -> web.Response:
     for id in rooms:
         room = rooms.get(id)
         if room:
-            room_details.append(room.options)
+            ui_room: typing.Mapping[str, typing.Any] = {}
+            ui_room["name"] = room.name
+            ui_room["id"] = room.game
+            room_details.append(ui_room)
     LOG.info(f"Returning room details: {room_details}")
     return web.json_response(room_details)
 
