@@ -41,9 +41,9 @@
           class="list-group-item list-group-item-action bg-transparent border-secondary d-flex align-items-center gap-3 px-3 py-3 text-light">
           <span
             class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center fw-bold app-avatar">
-            <img [src]="user.picture" [alt]="user.name" class="rounded-circle"
-              onerror="this.style.display='none'; this.nextSibling.classList.remove('d-none');" />
-            <span class="d-none fw-bold">{{ user.name.charAt(0).toUpperCase() }}</span>
+            <img [src]="user.picture" [alt]="user.name" class="rounded-circle h-100 w-100"
+              (error)="handleAvatarError($event, user.name)" />
+            <span class="d-none fw-bold"></span>
           </span>
           <span class="flex-grow-1 min-width-0">
             <strong class="d-block text-truncate">{{ user.name }}</strong>

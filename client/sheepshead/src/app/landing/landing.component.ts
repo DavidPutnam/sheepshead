@@ -106,6 +106,20 @@ export class LandingComponent implements OnInit {
     });
   }
 
+  protected handleAvatarError(event: Event, fullName: string): void {
+    const image = event.currentTarget as HTMLImageElement;
+    const initials = image.nextElementSibling as HTMLElement | null;
+    const nameParts = fullName.trim().split(/\s+/);
+
+    image.style.display = 'none';
+    if (initials) {
+      initials.textContent = (nameParts[0]?.charAt(0) ?? '')
+        + (nameParts.length > 1 ? nameParts[nameParts.length - 1].charAt(0) : '')
+        .toUpperCase();
+      initials.classList.remove('d-none');
+    }
+  }
+
   protected openCreateRoomDialog(): void {
     this.resetCreateRoomForm();
     this.isCreateRoomDialogOpen.set(true);
