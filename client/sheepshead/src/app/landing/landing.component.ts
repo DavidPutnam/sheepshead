@@ -7,6 +7,8 @@ interface User {
   id: string;
   name: string;
   email: string;
+  picture: string | null;
+  room: string | null;
 }
 
 interface Room {
@@ -203,14 +205,7 @@ export class LandingComponent implements OnInit {
       .get<Room[] | { rooms: Room[] }>(`${environment.apiUrl}/api/v1/rooms`, { headers })
       .subscribe({
         next: (response) => {
-          const rooms = Array.isArray(response) ? response : response.rooms ?? [];
-          this.rooms.set(
-            rooms.map((room, index) => ({
-              ...room,
-              id: String(room.id ?? room.name ?? `room-${index + 1}`),
-              name: String(room.name ?? room.id ?? `Room ${index + 1}`),
-            })),
-          );
+          this.rooms.set(Array.isArray(response) ? response : response.rooms ?? []);
           this.roomsLoading.set(false);
           this.roomsLoadError.set(false);
           this.lastUpdated.set(new Date());
