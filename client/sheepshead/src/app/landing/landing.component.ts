@@ -8,12 +8,14 @@ interface User {
   name: string;
   email: string;
   picture: string | null;
-  room: string | null;
+  roomname: string | null;
 }
 
 interface Room {
   id: string;
   name: string;
+  game: string;
+  options: Record<string, unknown>;
   [key: string]: unknown;
 }
 
@@ -115,7 +117,7 @@ export class LandingComponent implements OnInit {
     if (initials) {
       initials.textContent = (nameParts[0]?.charAt(0) ?? '')
         + (nameParts.length > 1 ? nameParts[nameParts.length - 1].charAt(0) : '')
-        .toUpperCase();
+          .toUpperCase();
       initials.classList.remove('d-none');
     }
   }
@@ -133,6 +135,10 @@ export class LandingComponent implements OnInit {
   protected cancelCreateRoom(): void {
     this.closeCreateRoomDialog();
     this.router.navigateByUrl('/');
+  }
+
+  protected joinRoom(room: Room): void {
+    this.router.navigate(['/game', room.game], { state: { room } });
   }
 
   protected updatePlayerCount(value: string): void {

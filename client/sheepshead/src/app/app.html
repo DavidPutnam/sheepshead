@@ -1,6 +1,6 @@
 @if (isLoggedIn()) {
 <app-landing />
-} @else {
+} @else if (!isGamePage()) {
 <app-login (loginSuccessful)="showLandingPage($event)" />
 }
 

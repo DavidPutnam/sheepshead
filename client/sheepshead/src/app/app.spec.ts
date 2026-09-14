@@ -3,6 +3,8 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    sessionStorage.removeItem('authToken');
+
     await TestBed.configureTestingModule({
       imports: [App],
     })

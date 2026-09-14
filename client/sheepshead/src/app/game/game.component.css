@@ -1,0 +1,25 @@
+:host {
+    display: block;
+}
+
+.game-page {
+    background: radial-gradient(circle at top left, rgba(255, 193, 7, 0.16), transparent 30%),
+        linear-gradient(135deg, #0d1b1d 0%, #102c2a 52%, #0b2022 100%);
+}
+
+.letter-spacing {
+    letter-spacing: 0.12em;
+}
+
+.game-panel {
+    max-width: 42rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(249, 244, 232, 0.22);
+    background: rgba(6, 19, 21, 0.48);
+}
+
+.game-panel dt,
+.game-panel dd {
+    padding-block: 0.65rem;
+    border-bottom: 1px solid rgba(249, 244, 232, 0.12);
+}

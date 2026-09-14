@@ -51,10 +51,10 @@ class User:
         self.id: str = id
         self.detail: typing.Mapping[str, typing.Any] = detail
         self.sid: str | None = None
-        self.room: str | None = None
+        self.roomname: str | None = None
 
-    def set_room(self: User, room: str | None):
-        self.room = room
+    def set_roomname(self: User, roomname: str | None):
+        self.roomname = roomname
 
     def set_socket(self: User, sid: str | None):
         self.sid = sid
@@ -185,7 +185,7 @@ async def handle_get_users(request: web.Request) -> web.Response:
             ui_user["name"] = user.detail.get("name")
             ui_user["email"] = user.detail.get("email")
             ui_user["picture"] = user.detail.get("picture")
-            ui_user["room"] = user.room
+            ui_user["roomname"] = user.roomname
             user_details.append(ui_user)
     LOG.info(f"Returning user details: {user_details}")
     return web.json_response(user_details)
@@ -227,9 +227,18 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
         options: typing.Mapping[str, typing.Any] | None = room_data.get("options", None)
         # should validate options here, but for now, just store it as-is
         if name is not None and options is not None and game == "sheepshead":
-            rooms[name] = Room(str(uuid.uuid4()), name, game, options)
-        LOG.info(f"Room created: {name}")
-        return web.json_response({"message": "Room created successfully"}, status=201)
+            room = Room(str(uuid.uuid4()), name, game, options)
+            rooms[name] = room
+            ui_room: typing.Mapping[str, typing.Any] = {}
+            ui_room["id"] = room.id
+            ui_room["name"] = room.name
+            ui_room["game"] = room.game
+            ui_room["options"] = room.options
+            LOG.info(f"Room created: {name}")
+            return web.json_response(ui_room, status=201)
+        else:
+            LOG.error(f"Invalid room data: {room_data}")
+            return web.json_response({"error": "Invalid room data"}, status=400)
     except Exception as e:
         LOG.error(f"Error parsing room data: {e}")
         return web.json_response({"error": "Invalid room data"}, status=400)
@@ -281,14 +290,16 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
 #     await sio.emit('my_response', {'data': message['data']},
 #                    room=message['room'])
 
-# @sio.event
-# async def connect(sid, environ, auth=None):
 
-#     await sio.emit('my_response', {'data': 'Connected', 'count': 0}, room=sid)
+@sio.event
+async def connect(sid, environ, auth=None):
+    print("Client connected, sid:", sid, "environ:", environ, "auth:", auth)
+    await sio.emit("my_response", {"data": "Connected", "count": 0}, room=sid)
 
-# @sio.event
-# async def disconnect(sid, reason):
-#     print('Client disconnected, reason:', reason)
+
+@sio.event
+async def disconnect(sid, reason):
+    print("Client disconnected, sid:", sid, "reason:", reason)
 
 
 #
@@ -309,7 +320,7 @@ def main() -> int:
     args = parser.parse_args()
 
     app = web.Application(middlewares=[cors_middleware])
-    sio.attach(app)
+    sio.attach(app, socketio_path="wss")
 
     app.router.add_route("OPTIONS", "/{path:.*}", handle_options)
     app.router.add_get("/api/v1/users", handle_get_users)

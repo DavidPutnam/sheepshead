@@ -1,0 +1,34 @@
+<main class="game-page container-fluid text-light min-vh-100 py-4 px-3 px-md-5">
+    <header class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+        <div>
+            <p class="text-warning text-uppercase small fw-bold mb-2 letter-spacing">Room {{ room()?.name ?? 'Unknown'
+                }}</p>
+            <h1 class="display-5 mb-0">{{ isSheepshead() ? 'Sheepshead' : game() }}</h1>
+        </div>
+        <button class="btn btn-outline-warning" type="button" (click)="leaveGame()">Leave room</button>
+    </header>
+
+    @if (!isSheepshead()) {
+    <section class="alert alert-warning" role="alert">
+        The game <strong>{{ game() }}</strong> is currently unsupported. Only Sheepshead is available right now.
+    </section>
+    } @else {
+    <section class="game-panel" aria-labelledby="options-title">
+        <div class="d-flex justify-content-between align-items-baseline gap-3 mb-3">
+            <h2 id="options-title" class="h3 mb-0">Room options</h2>
+            <span class="text-white-50 small text-uppercase">{{ socketState() }}</span>
+        </div>
+
+        @if (optionEntries().length === 0) {
+        <p class="text-white-50 mb-0">No room options were provided.</p>
+        } @else {
+        <dl class="row mb-0">
+            @for (option of optionEntries(); track option[0]) {
+            <dt class="col-sm-5 text-warning">{{ option[0] }}</dt>
+            <dd class="col-sm-7">{{ option[1] }}</dd>
+            }
+        </dl>
+        }
+    </section>
+    }
+</main>

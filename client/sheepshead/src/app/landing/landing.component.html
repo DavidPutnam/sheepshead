@@ -49,7 +49,7 @@
             <strong class="d-block text-truncate">{{ user.name }}</strong>
             <span class="d-block text-white-50 text-truncate">{{ user.email }}</span>
           </span>
-          <span class="badge bg-warning text-dark text-truncate">{{ user.room }}</span>
+          <span class="badge bg-warning text-dark text-truncate">{{ user.roomname }}</span>
         </article>
         }
         }
@@ -93,8 +93,8 @@
             <strong class="d-block text-truncate">{{ room.name }}</strong>
             <span class="d-block text-white-50 text-truncate">{{ room['game'] + " " + room['options'] }}</span>
           </span>
-          <button class="btn btn-outline-warning btn-sm" type="button"
-            [attr.aria-label]="'Join room ' + room.name">Join</button>
+          <button class="btn btn-outline-warning btn-sm" type="button" [attr.aria-label]="'Join room ' + room.name"
+            (click)="joinRoom(room)">Join</button>
         </article>
         }
         }
