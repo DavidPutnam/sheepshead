@@ -30,9 +30,15 @@ export class GameComponent implements OnInit {
         this.game.set(this.route.snapshot.paramMap.get('game') ?? '');
         this.room.set(history.state.room ?? null);
         this.openSocket();
-
+        this.socket?.emit('join_room', { room: this.room()?.id },
+            (response: { success: boolean; error?: string }) => {
+                if (!response.success) {
+                    console.error('Failed to join room:', response.error);
+                    this.router.navigateByUrl('/');
+                }
+            });
         this.destroyRef.onDestroy(() => {
-                this.socket?.disconnect();
+            this.socket?.disconnect();
         });
     }
 
@@ -51,6 +57,10 @@ export class GameComponent implements OnInit {
     private openSocket(): void {
         this.socket = io(environment.apiUrl, {
             path: '/wss',
+            auth: {
+                room: this.room()?.id,
+                token: sessionStorage.getItem('authToken'),
+            },
             transports: ['websocket'],
         });
         this.socket.on('connect', () => this.socketState.set('open'));

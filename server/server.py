@@ -11,6 +11,7 @@
 
 import io
 import time
+import token
 import uuid
 
 from google.oauth2 import id_token
@@ -51,16 +52,20 @@ class User:
         self.id: str = id
         self.detail: typing.Mapping[str, typing.Any] = detail
         self.sid: str | None = None
-        self.roomname: str | None = None
+        self.room: str | None = None
 
-    def set_roomname(self: User, roomname: str | None):
-        self.roomname = roomname
+    def set_room(self: User, room: str | None):
+        self.room = room
 
     def set_socket(self: User, sid: str | None):
         self.sid = sid
 
+    def get_name(self: User) -> str:
+        return self.detail.get("name", "unknown")
+
 
 users: typing.Dict[str, User] = {}
+sids: typing.Dict[str, User] = {}
 
 
 class Room:
@@ -110,6 +115,8 @@ def require_auth(handler: Handler) -> Handler:
                     "https://accounts.google.com",
                 ]:
                     raise ValueError("Wrong issuer.")
+                if id_info["aud"] != GOOGLE_CLIENT_ID:
+                    raise ValueError("Wrong audience.")
                 if id_info["email_verified"] is not True:
                     raise ValueError("Email not verified.")
             except ValueError as e:
@@ -185,7 +192,11 @@ async def handle_get_users(request: web.Request) -> web.Response:
             ui_user["name"] = user.detail.get("name")
             ui_user["email"] = user.detail.get("email")
             ui_user["picture"] = user.detail.get("picture")
-            ui_user["roomname"] = user.roomname
+            if user.room:
+                room: Room | None = rooms.get(user.room)
+                ui_user["roomname"] = room.name if room else None
+            else:
+                ui_user["roomname"] = None
             user_details.append(ui_user)
     LOG.info(f"Returning user details: {user_details}")
     return web.json_response(user_details)
@@ -228,7 +239,7 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
         # should validate options here, but for now, just store it as-is
         if name is not None and options is not None and game == "sheepshead":
             room = Room(str(uuid.uuid4()), name, game, options)
-            rooms[name] = room
+            rooms[room.id] = room
             ui_room: typing.Mapping[str, typing.Any] = {}
             ui_room["id"] = room.id
             ui_room["name"] = room.name
@@ -257,15 +268,32 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
 # 	}
 # 	await sio.emit(event='message', data=chat_message, room=user.room, skip_sid=sid)
 
-# @sio.event
-# async def join_room(sid, message):
-# 	user: User = _get_user_by_sid(sid)
-# 	user.set_room(message['room'])
-# 	room: Room = rooms.get(message['room'])
-# 	room.add_user(user)
-# 	await sio.enter_room(sid, room.name)
-# 	await sio.emit('my_response', {'data': 'Entered room: ' + message['room']},
-#                    room=sid)
+
+@sio.event
+async def join_room(sid, data):
+    user: User | None = sids.get(sid)
+    if not user:
+        print("User not found for sid:", sid)
+    else:
+        room: Room | None = rooms.get(data["room"])
+        print("User", user.get_name(), "joining room:", data["room"])
+        if room:
+            room.add_user(user)
+            user.set_room(room.id)
+            await sio.enter_room(sid, room.id)
+            await sio.emit("response", {"data": "Entered room: " + room.name}, room=sid)
+            await sio.emit(
+                "response",
+                {"data": user.get_name() + " has joined the room."},
+                room=room.id,
+                skip_sid=sid,
+            )
+        else:
+            print("Room not found:", data["room"])
+            await sio.emit(
+                "response", {"data": "Room not found: " + data["room"]}, room=sid
+            )
+
 
 # @sio.event
 # async def leave_room(sid, message):
@@ -294,12 +322,43 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
 @sio.event
 async def connect(sid, environ, auth=None):
     print("Client connected, sid:", sid, "environ:", environ, "auth:", auth)
-    await sio.emit("my_response", {"data": "Connected", "count": 0}, room=sid)
+    # Validate the auth token
+    if auth is None or "token" not in auth:
+        print("Missing auth token")
+        return False
+    token = auth["token"]
+    # LOG.info(f"Verifying Google ID token: {token}")
+    # Verify the token with Google's ID token verification
+    id_info = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+    # LOG.info(f"Verified Google ID token: {id_info}")
+    if id_info["iss"] not in [
+        "accounts.google.com",
+        "https://accounts.google.com",
+    ]:
+        LOG.error("Wrong issuer in token for sid %s: %s", sid, id_info["iss"])
+    if id_info["aud"] != GOOGLE_CLIENT_ID:
+        LOG.error("Wrong audience in token for sid %s: %s", sid, id_info["aud"])
+
+    # associate the sid with the user
+    user_info: User | None = users.get(id_info["sub"], None)
+    if not user_info:
+        users[id_info["sub"]] = User(id_info["sub"], id_info)
+        user_info = users[id_info["sub"]]
+    user_info.set_socket(sid)
+    sids[sid] = user_info
+    print("User connected sid:", sid, "user:", user_info.get_name())
 
 
 @sio.event
 async def disconnect(sid, reason):
     print("Client disconnected, sid:", sid, "reason:", reason)
+    # get the user associated with the sid
+    user_info: User | None = sids.get(sid, None)
+    if user_info:
+        user_info.set_socket(None)
+        user_info.set_room(None)
+    if sid in sids:
+        del sids[sid]
 
 
 #
