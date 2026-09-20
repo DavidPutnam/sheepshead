@@ -36,6 +36,9 @@ export class GameComponent implements OnInit {
                     console.error('Failed to join room:', response.error);
                     this.router.navigateByUrl('/');
                 }
+                if (response.success) {
+                    console.error('Successfully joined room:', this.room()?.name);
+                }
             });
         this.destroyRef.onDestroy(() => {
             this.socket?.disconnect();

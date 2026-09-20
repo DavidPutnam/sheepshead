@@ -9,9 +9,10 @@
 # from pathlib import Path
 # from urllib.parse import parse_qs
 
-import io
+# import io
 import time
-import token
+
+# import token
 import uuid
 
 from google.oauth2 import id_token
@@ -255,18 +256,17 @@ async def handle_post_rooms(request: web.Request) -> web.Response:
         return web.json_response({"error": "Invalid room data"}, status=400)
 
 
-# #
-# # Handle the socket.io events
-# @sio.event
-# async def chat_message(sid: str, message: dict):
-# 	when = time.time()
-# 	user: User = _get_user_by_sid(sid)
-# 	chat_message = {
-# 		"when": when,
-# 		"from": user.detail.get("name", sid),
-# 		"data": message['data'],
-# 	}
-# 	await sio.emit(event='message', data=chat_message, room=user.room, skip_sid=sid)
+#
+# Handle the socket.io events
+@sio.event
+async def chat_message(sid: str, message: dict):
+    user: User = sids[sid]
+    chat_message = {
+        "when": time.time(),
+        "from": user.get_name(),
+        "data": message["data"],
+    }
+    await sio.emit(event="message", data=chat_message, room=user.room)
 
 
 @sio.event
@@ -281,17 +281,27 @@ async def join_room(sid, data):
             room.add_user(user)
             user.set_room(room.id)
             await sio.enter_room(sid, room.id)
-            await sio.emit("response", {"data": "Entered room: " + room.name}, room=sid)
             await sio.emit(
                 "response",
-                {"data": user.get_name() + " has joined the room."},
+                {"success": True, "error": None, "data": "Entered room: " + room.name},
+                room=sid,
+            )
+            chat_message = {
+                "when": time.time(),
+                "from": user.get_name(),
+                "data": user.get_name() + " has joined the room.",
+            }
+            await sio.emit(
+                "message",
+                chat_message,
                 room=room.id,
-                skip_sid=sid,
             )
         else:
             print("Room not found:", data["room"])
             await sio.emit(
-                "response", {"data": "Room not found: " + data["room"]}, room=sid
+                "response",
+                {"success": False, "error": "Room not found: " + data["room"]},
+                room=sid,
             )
 
 
