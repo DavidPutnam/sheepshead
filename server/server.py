@@ -110,6 +110,8 @@ def require_auth(handler: Handler) -> Handler:
                 id_info = id_token.verify_oauth2_token(
                     token, requests.Request(), GOOGLE_CLIENT_ID
                 )
+                if not id_info:
+                    raise ValueError("Invalid token")
                 # LOG.info(f"Verified Google ID token: {id_info}")
                 if id_info["iss"] not in [
                     "accounts.google.com",
